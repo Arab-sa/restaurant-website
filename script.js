@@ -55,6 +55,51 @@ function init() {
     document.getElementById('btn-customer').classList.add('active');
 }
 
+function init() {
+    cacheElements();
+    fillCategorySelects();
+    renderCategoryFilters();
+    bindEvents();
+    applySettings();
+    renderProducts();
+    updateCartUI();
+    renderOrders();
+    startClock();
+    document.getElementById('btn-customer').classList.add('active');
+}
+
+function startClock() {
+    const clock = document.getElementById('live-clock');
+    const update = () => {
+        const now = new Date();
+        clock.textContent = now.toLocaleTimeString('ar-EG', { hour12: true });
+    };
+    setInterval(update, 1000);
+    update();
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const target = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', target);
+    localStorage.setItem('theme', target);
+}
+
+function toggleStats() {
+    if (state.currentRole !== 'admin') return;
+    const statsDiv = document.getElementById('admin-stats');
+    statsDiv.hidden = !statsDiv.hidden;
+    if (!statsDiv.hidden) {
+        const revenue = state.orders.reduce((sum, o) => sum + o.total, 0);
+        const count = state.orders.length;
+        const avg = count > 0 ? revenue / count : 0;
+
+        document.getElementById('stat-revenue').textContent = formatMoney(revenue);
+        document.getElementById('stat-orders-count').textContent = count;
+        document.getElementById('stat-avg').textContent = formatMoney(avg);
+    }
+}
+
 function cacheElements() {
     [
         'welcome-modal', 'pin-modal', 'edit-modal', 'confirm-modal', 'admin-pin', 'pin-error',
@@ -78,6 +123,7 @@ function bindEvents() {
     els['search-input'].addEventListener('input', debounce(renderProducts, 120));
     els['search-input'].addEventListener('search', renderProducts);
     els['search-input'].addEventListener('change', renderProducts);
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
     els['new-img-file'].addEventListener('change', () => previewFileName(els['new-img-file']));
     els['admin-panel'].addEventListener('submit', (e) => {
         e.preventDefault();
@@ -122,6 +168,7 @@ function onClick(e) {
         'add-to-cart': () => addToCart(id),
         'edit-product': () => openEditModal(id),
         'delete-product': () => deleteProduct(id),
+        'toggle-stats': toggleStats,
         'qty': () => changeQuantity(id, delta),
         'filter-category': () => setCategory(btn.dataset.category)
     };

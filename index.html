@@ -13,11 +13,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <a class="skip-link" href="#products-grid">تخطي إلى القائمة</a>
-
     <div id="welcome-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
-        <div class="welcome-box">
-            <div class="brand-mark" aria-hidden="true">🍔</div>
+                <div class="welcome-box">
+            <div class="brand-mark" aria-hidden="true">
+                <img src="logo.png" alt="شعار مطعم البرنس" class="logo-img">
+            </div>
             <h2 id="welcome-title">أهلاً بكم في مطعم البرنس</h2>
             <p>اختر طريقة الدخول للمتابعة إلى قائمة الطعام والطلبات.</p>
             <div class="welcome-buttons">
@@ -73,14 +73,17 @@
         </div>
     </div>
 
-    <header class="main-header">
-        <div class="header-content">
-            <p class="eyebrow">منذ 2014</p>
-            <h1>مطعم البرنس</h1>
-            <p>أطيب المأكولات السريعة في الفيوم</p>
-        </div>
-        <div class="header-actions">
-            <button type="button" class="mobile-cart-btn" data-action="toggle-cart" aria-controls="cart-section">
+        <header class="main-header">
+            <div class="header-brand">
+                <img src="logo.png" alt="شعار مطعم البرنس" class="header-logo">
+                <div class="header-content">
+                    <h1>مطعم البرنس</h1>
+                    <p id="live-clock"></p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" id="theme-toggle" class="theme-btn" aria-label="تبديل الوضع">🌓</button>
+                <button type="button" class="mobile-cart-btn" data-action="toggle-cart" aria-controls="cart-section">
                 السلة
                 <span id="header-cart-count" class="cart-count">0</span>
             </button>
@@ -125,11 +128,27 @@
                     </div>
                     <button type="submit">إضافة الوجبة</button>
                 </div>
-                <div class="admin-tools">
+                                <div class="admin-tools">
                     <button type="button" class="ghost-btn" data-action="reset-menu">استعادة المنيو الافتراضي</button>
                     <button type="button" class="ghost-btn" data-action="toggle-history">سجل الفواتير</button>
+                    <button type="button" class="ghost-btn stats-trigger" data-action="toggle-stats">الإحصائيات التحليلية</button>
                 </div>
             </form>
+
+            <div id="admin-stats" class="stats-grid admin-only" hidden>
+                <div class="stat-card">
+                    <span class="stat-label">إجمالي الدخل</span>
+                    <strong id="stat-revenue">0.00 ج.م</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">عدد الطلبات</span>
+                    <strong id="stat-orders-count">0</strong>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">متوسط الفاتورة</span>
+                    <strong id="stat-avg">0.00 ج.م</strong>
+                </div>
+            </div>
 
             <div id="orders-history" class="orders-history" hidden>
                 <h3>آخر الفواتير</h3>
@@ -198,9 +217,10 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <div id="receipt-print" class="print-only">
+        <div id="receipt-print" class="print-only">
         <div class="receipt-box">
             <div class="receipt-header">
+                <img src="logo.png" alt="Logo" class="receipt-logo">
                 <h2>مطعم البرنس</h2>
                 <p>العنوان: الفيوم - شارع البحر</p>
                 <p>هاتف: 01000000000</p>
