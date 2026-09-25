@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="مطعم البرنس — قائمة طعام فاخرة، طلبات سريعة، وإدارة منيو كاملة.">
+    <meta name="theme-color" content="#1a1410">
+    <title>مطعم البرنس | قائمة الطعام والطلبات</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23c9a227'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='32'%3E🍔%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a class="skip-link" href="#products-grid">تخطي إلى القائمة</a>
+
+    <div id="welcome-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+        <div class="welcome-box">
+            <div class="brand-mark" aria-hidden="true">🍔</div>
+            <h2 id="welcome-title">أهلاً بكم في مطعم البرنس</h2>
+            <p>اختر طريقة الدخول للمتابعة إلى قائمة الطعام والطلبات.</p>
+            <div class="welcome-buttons">
+                <button type="button" class="welcome-btn customer" data-action="enter-customer">دخول كعميل</button>
+                <button type="button" class="welcome-btn admin" data-action="enter-admin">دخول كمدير النظام</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pin-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pin-title">
+        <div class="edit-box pin-box">
+            <h3 id="pin-title">دخول المدير</h3>
+            <p class="modal-hint">أدخل رمز المدير للمتابعة.</p>
+            <label class="sr-only" for="admin-pin">رمز المدير</label>
+            <input type="password" id="admin-pin" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="رمز الدخول">
+            <p id="pin-error" class="field-error" hidden>الرمز غير صحيح</p>
+            <div class="modal-buttons">
+                <button type="button" class="save-btn" data-action="submit-pin">دخول</button>
+                <button type="button" class="cancel-btn" data-action="close-pin">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+        <div class="edit-box">
+            <h3 id="edit-title">تعديل الوجبة</h3>
+            <input type="hidden" id="edit-id">
+            <label class="field-label" for="edit-name">اسم الوجبة</label>
+            <input type="text" id="edit-name" maxlength="60" required>
+            <label class="field-label" for="edit-price">السعر (ج.م)</label>
+            <input type="number" id="edit-price" min="1" step="0.5" required>
+            <label class="field-label" for="edit-category">التصنيف</label>
+            <select id="edit-category"></select>
+            <label class="field-label" for="edit-desc">الوصف</label>
+            <input type="text" id="edit-desc" maxlength="120">
+            <label class="field-label" for="edit-img-file">تغيير الصورة (اختياري)</label>
+            <input type="file" id="edit-img-file" accept="image/jpeg,image/png,image/webp">
+            <div class="modal-buttons">
+                <button type="button" class="save-btn" data-action="save-edit">حفظ التعديلات</button>
+                <button type="button" class="cancel-btn" data-action="close-edit">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+        <div class="edit-box">
+            <h3 id="confirm-title">تأكيد</h3>
+            <p id="confirm-message"></p>
+            <div class="modal-buttons">
+                <button type="button" class="save-btn danger" data-action="confirm-ok">تأكيد</button>
+                <button type="button" class="cancel-btn" data-action="confirm-cancel">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="main-header">
+        <div class="header-content">
+            <p class="eyebrow">منذ 2014</p>
+            <h1>مطعم البرنس</h1>
+            <p>أطيب المأكولات السريعة في الفيوم</p>
+        </div>
+        <div class="header-actions">
+            <button type="button" class="mobile-cart-btn" data-action="toggle-cart" aria-controls="cart-section">
+                السلة
+                <span id="header-cart-count" class="cart-count">0</span>
+            </button>
+            <div class="role-selector" role="group" aria-label="تبديل الصلاحية">
+                <span>الصفة:</span>
+                <button type="button" id="btn-customer" class="role-btn active" data-action="role-customer">عميل</button>
+                <button type="button" id="btn-admin" class="role-btn" data-action="role-admin">مدير</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="menu-section" aria-labelledby="menu-heading">
+            <div class="section-title">
+                <h2 id="menu-heading">قائمة الطعام</h2>
+                <span class="badge" id="mode-badge">وضع العميل</span>
+            </div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <label class="sr-only" for="search-input">بحث في القائمة</label>
+                    <input type="search" id="search-input" placeholder="ابحث عن وجبة أو وصف..." autocomplete="off">
+                </div>
+                <div id="category-filters" class="category-filters" role="tablist" aria-label="تصنيفات القائمة"></div>
+            </div>
+
+            <form id="admin-panel" class="add-product-form admin-only" hidden>
+                <h3>إضافة وجبة جديدة</h3>
+                <div class="form-inputs">
+                    <label class="sr-only" for="new-name">اسم الوجبة</label>
+                    <input type="text" id="new-name" placeholder="اسم الوجبة" maxlength="60" required>
+                    <label class="sr-only" for="new-price">السعر</label>
+                    <input type="number" id="new-price" placeholder="السعر (ج.م)" min="1" step="0.5" required>
+                    <label class="sr-only" for="new-category">التصنيف</label>
+                    <select id="new-category"></select>
+                    <label class="sr-only" for="new-desc">الوصف</label>
+                    <input type="text" id="new-desc" placeholder="وصف قصير" maxlength="120">
+                    <div class="file-input-wrapper">
+                        <label for="new-img-file" class="file-label">اختر صورة الوجبة</label>
+                        <input type="file" id="new-img-file" accept="image/jpeg,image/png,image/webp">
+                        <span id="file-name-span">لم يتم اختيار ملف</span>
+                    </div>
+                    <button type="submit">إضافة الوجبة</button>
+                </div>
+                <div class="admin-tools">
+                    <button type="button" class="ghost-btn" data-action="reset-menu">استعادة المنيو الافتراضي</button>
+                    <button type="button" class="ghost-btn" data-action="toggle-history">سجل الفواتير</button>
+                </div>
+            </form>
+
+            <div id="orders-history" class="orders-history" hidden>
+                <h3>آخر الفواتير</h3>
+                <ul id="orders-list"></ul>
+            </div>
+
+            <div class="products-grid" id="products-grid"></div>
+        </section>
+
+        <aside class="cart-section" id="cart-section" aria-labelledby="cart-heading">
+            <button type="button" class="cart-close" data-action="toggle-cart" aria-label="إغلاق السلة">✕</button>
+            <div class="cart-header">
+                <h2 id="cart-heading">سلة الطلبات</h2>
+                <button type="button" class="clear-btn" data-action="clear-cart">مسح</button>
+            </div>
+
+            <ul id="cart-items" class="cart-items-list">
+                <li class="empty-msg">السلة فارغة حالياً</li>
+            </ul>
+
+            <div class="financial-inputs">
+                <div class="input-group">
+                    <label for="discount-percent">الخصم (%) <span id="lock-icon-discount" class="lock-icon">🔒</span></label>
+                    <input type="number" id="discount-percent" value="0" min="0" max="100" step="1" readonly>
+                </div>
+                <div class="input-group">
+                    <label for="tax-percent">الضريبة (%) <span id="lock-icon-tax" class="lock-icon">🔒</span></label>
+                    <input type="number" id="tax-percent" value="14" min="0" max="50" step="0.5" readonly>
+                </div>
+            </div>
+
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>المجموع الفرعي</span>
+                    <strong id="subtotal-price">0.00 ج.م</strong>
+                </div>
+                <div class="summary-row">
+                    <span>الخصم</span>
+                    <strong id="discount-amount">0.00 ج.م</strong>
+                </div>
+                <div class="summary-row">
+                    <span>الضريبة</span>
+                    <strong id="tax-amount">0.00 ج.م</strong>
+                </div>
+                <hr>
+                <div class="summary-row total-row">
+                    <span>الإجمالي النهائي</span>
+                    <strong id="total-price">0.00 ج.م</strong>
+                </div>
+            </div>
+
+            <form class="customer-info" id="checkout-form">
+                <h3>بيانات العميل</h3>
+                <label class="sr-only" for="cust-name">اسم العميل</label>
+                <input type="text" id="cust-name" placeholder="اسم العميل (مطلوب)" maxlength="40" required autocomplete="name">
+                <label class="sr-only" for="cust-phone">رقم الهاتف</label>
+                <input type="tel" id="cust-phone" placeholder="رقم الهاتف" maxlength="15" inputmode="tel" autocomplete="tel">
+                <button type="submit" class="print-btn">تأكيد وطباعة الفاتورة</button>
+            </form>
+        </aside>
+    </main>
+
+    <footer class="site-footer">
+        <p>مطعم البرنس — الفيوم، شارع البحر · هاتف 01000000000</p>
+    </footer>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div id="receipt-print" class="print-only">
+        <div class="receipt-box">
+            <div class="receipt-header">
+                <h2>مطعم البرنس</h2>
+                <p>العنوان: الفيوم - شارع البحر</p>
+                <p>هاتف: 01000000000</p>
+            </div>
+            <div class="dashed-divider"></div>
+            <div class="receipt-info">
+                <div><span>رقم الفاتورة:</span> <strong id="print-invoice-id"></strong></div>
+                <div><span>التاريخ والوقت:</span> <span id="print-date"></span></div>
+                <div><span>اسم العميل:</span> <span id="print-name"></span></div>
+                <div><span>رقم الهاتف:</span> <span id="print-phone"></span></div>
+            </div>
+            <div class="dashed-divider"></div>
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th>الصنف</th>
+                        <th>العدد</th>
+                        <th>السعر</th>
+                    </tr>
+                </thead>
+                <tbody id="print-items"></tbody>
+            </table>
+            <div class="dashed-divider"></div>
+            <div class="receipt-totals">
+                <div><span>المجموع الفرعي:</span> <span id="print-subtotal"></span> ج.م</div>
+                <div><span>الخصم:</span> <span id="print-discount"></span> ج.م</div>
+                <div><span>الضريبة:</span> <span id="print-tax"></span> ج.م</div>
+                <div class="final-total"><span>الإجمالي الصافي:</span> <strong id="print-total"></strong> ج.م</div>
+            </div>
+            <div class="dashed-divider"></div>
+            <div class="receipt-footer">
+                <p>شكراً لزيارتكم مطعم البرنس</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
